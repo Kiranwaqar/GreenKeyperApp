@@ -20,11 +20,10 @@ async function connectDB() {
     console.log('Connected to SQL Server');
     const { recordset } = await pool.request().query('SELECT DB_NAME() AS db, SUSER_SNAME() AS login, GETDATE() AS now');
     console.log(recordset);
+    return pool;
   } catch (err) {
     console.error('Database connection failed:', err);
   }
 }
 
-connectDB();
-
-module.exports = sql;
+module.exports = connectDB();
