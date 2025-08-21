@@ -38,5 +38,66 @@ exports.createUser = async (req, res) => {
   }
 };
 
+// Get all users
+exports.getAllUsers = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query("SELECT * FROM greenkeyper.Users");
+    res.status(200).json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
+// Get mechanics
+exports.getMechanics = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .query("SELECT * FROM greenkeyper.Users WHERE role_id = 'FEAE6B7B-2D4E-478A-9739-E67F09C6135E'");
+    res.status(200).json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching mechanics:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
+// Get drivers
+exports.getDrivers = async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .query("SELECT * FROM greenkeyper.Users WHERE role_id = '05D6CABD-D9BB-4998-A0AF-FD096FBDC068'");
+    res.status(200).json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching drivers:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Login
+exports.loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input("email", sql.VarChar(255), email)
+      .query("SELECT * FROM greenkeyper.Users WHERE email = @email");
+    const user = result.recordset[0];
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    res.status(200).json({ message: "Login successful", user });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
