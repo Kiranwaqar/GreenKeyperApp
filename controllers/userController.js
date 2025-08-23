@@ -101,3 +101,73 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// Logout
+exports.logoutUser = (req, res) => {
+  res.status(200).json({ message: "Logout successful" });
+};
+
+// Update user info
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role_id, email, password, first_name, last_name, phone, status } = req.body;
+    const pool = await poolPromise;
+
+    // Hash password if provided
+    let password_hash;
+    if (password) {
+      const saltRounds = 10;
+      password_hash = await bcrypt.hash(password, saltRounds);
+    }
+
+    // Build dynamic SQL
+    let query = 'UPDATE greenkeyper.Users SET ';
+    const updates = [];
+    if (role_id) updates.push(`role_id = @role_id`);
+    if (email) updates.push(`email = @email`);
+    if (password_hash) updates.push(`password_hash = @password_hash`);
+    if (first_name) updates.push(`first_name = @first_name`);
+    if (last_name) updates.push(`last_name = @last_name`);
+    if (phone !== undefined) updates.push(`phone = @phone`);
+    if (status !== undefined) updates.push(`status = @status`);
+
+    if (updates.length === 0) {
+      return res.status(400).json({ message: 'No valid fields provided for update' });
+    }
+
+    query += updates.join(', ') + ' WHERE id = @id';
+
+    const request = pool.request().input('id', sql.Char(36), id);
+    if (role_id) request.input('role_id', sql.Char(36), role_id);
+    if (email) request.input('email', sql.VarChar(255), email);
+    if (password_hash) request.input('password_hash', sql.VarChar(255), password_hash);
+    if (first_name) request.input('first_name', sql.VarChar(100), first_name);
+    if (last_name) request.input('last_name', sql.VarChar(100), last_name);
+    if (phone !== undefined) request.input('phone', sql.VarChar(30), phone);
+    if (status !== undefined) request.input('status', sql.VarChar(20), status);
+
+    await request.query(query);
+
+    res.status(200).json({ message: 'User info updated successfully!' });
+  } catch (err) {
+    console.error('Error updating user info:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+ 
+// Delete user
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pool = await poolPromise;
+    await pool.request()
+      .input('id', sql.Char(36), id)
+      .query('DELETE FROM greenkeyper.Users WHERE id = @id');
+    res.status(200).json({ message: 'User deleted successfully!' });
+  } catch (err) {
+    console.error('Error deleting user:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
