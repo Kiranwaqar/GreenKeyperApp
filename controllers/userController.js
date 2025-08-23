@@ -95,6 +95,7 @@ exports.loginUser = async (req, res) => {
     if (!match) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
+    req.session.user = user;
     res.status(200).json({ message: "Login successful", user });
   } catch (err) {
     console.error("Login error:", err);
@@ -102,9 +103,17 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-// Logout
 exports.logoutUser = (req, res) => {
-  res.status(200).json({ message: "Logout successful" });
+  if (req.session && req.session.user) {
+    req.session.destroy(err => {
+      if (err) {
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.status(200).json({ message: "Logout successful" });
+    });
+  } else {
+    res.status(401).json({ message: "User not logged in" });
+  }
 };
 
 // Update user info
