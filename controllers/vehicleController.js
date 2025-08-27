@@ -65,6 +65,21 @@ exports.deleteVehicle = async (req, res) => {
 	}
 };
 
+// Get vehicles by driver_id
+exports.getVehiclesByDriver = async (req, res) => {
+	try {
+		const { driver_id } = req.params;
+		const pool = await poolPromise;
+		const result = await pool.request()
+			.input('driver_id', sql.Char(36), driver_id)
+			.query('SELECT * FROM GREENKEYPER.Vehicles WHERE driver_id = @driver_id');
+		res.status(200).json(result.recordset);
+	} catch (err) {
+		console.error('Error fetching vehicles by driver:', err);
+		res.status(500).json({ message: 'Internal server error' });
+	}
+};
+
 // Update vehicle info
 exports.updateVehicle = async (req, res) => {
 	try {
