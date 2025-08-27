@@ -13,9 +13,8 @@ app.use(session({
   saveUninitialized: true
 }));
 
-app.use("/users", userRoutes);
-app.use("/vehicles", vehicleRoutes);
-app.use("/checklists", checklistRoutes);
+app.use('/web', require('./routes/webRoutes'));
+app.use('/mobile', require('./routes/mobileRoutes'));
 
 const PORT = 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
