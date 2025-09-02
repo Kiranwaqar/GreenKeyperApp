@@ -13,4 +13,8 @@ router.use('/vehicles', vehicleRoutes);
 const checklistRoutes=require("./checklistRoutes");
 router.use('/checklists', checklistRoutes);
 
+// Inspection routes
+const inspectionRoutes=require("./inspectionRoutes");   
+router.use('/inspections', inspectionRoutes);
+
 module.exports = router;

@@ -4,6 +4,7 @@ const session = require('express-session');
 const userRoutes = require("./routes/userRoutes");
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const checklistRoutes = require("./routes/checklistRoutes");
+const inspectionRoutes = require("./routes/inspectionRoutes");  
 
 app.use(express.json()); 
 
